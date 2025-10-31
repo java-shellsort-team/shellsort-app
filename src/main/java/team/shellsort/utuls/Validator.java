@@ -1,7 +1,6 @@
-import team.shellsort.model.Car;
 import java.util.List;
 
-public class Validator {
+public final class Validator {
 
     public boolean isValid(Car car) {
         if (car == null) {
@@ -18,20 +17,26 @@ public class Validator {
         return cars.stream().allMatch(this::isValid);
     }
 
+    /**
+     * Модель не должна быть пустой и должна быть не длиннее N символов
+     */
     private boolean isModelValid(String model) {
-        // Модель не должна быть пустой и должна быть не длиннее N символов
         return model != null && !model.trim().isEmpty() && model.length() <= 50;
     }
 
+    /**
+     * Год должен быть в разумном диапазоне
+     */
     private boolean isYearValid(int year) {
-        // Год должен быть в разумном диапазоне
         final int MIN_YEAR = 1900;
         final int MAX_YEAR = java.time.Year.now().getValue();
         return year >= MIN_YEAR && year <= MAX_YEAR;
     }
 
+    /**
+     * Мощность должна быть положительной
+     */
     private boolean isPowerValid(int power) {
-        //Мощность должна быть положительной
         return power > 0;
     }
 }
