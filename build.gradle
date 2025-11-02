@@ -9,12 +9,13 @@ version = '1.0.0'
 repositories { mavenCentral() }
 
 java {
-    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    //toolchain { languageVersion = JavaLanguageVersion.of(21) }
 }
 
 application {
     mainClass = 'team.shellsort.App'
 }
+
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'

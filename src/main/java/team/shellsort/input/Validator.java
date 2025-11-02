@@ -1,8 +1,14 @@
+package team.shellsort.input;
 import java.util.List;
 
 public final class Validator {
 
-    public boolean isValid(Car car) {
+    final static int MIN_YEAR = 1900;
+    final static int MAX_MODEL_LENGTH = 50;
+    final static int MIN_POWER = 0;
+    final static int MAX_YEAR = java.time.Year.now().getValue();
+
+    public static boolean isValid(Car car) {
         if (car == null) {
             return false;
         }
@@ -10,33 +16,31 @@ public final class Validator {
                 isYearValid(car.getYear()) &&
                 isPowerValid(car.getPower());
     }
-    public boolean areAllValid(List<Car> cars) {
+    public static boolean areAllValid(List<Car> cars) {
         if (cars == null || cars.isEmpty()) {
             return false;
         }
-        return cars.stream().allMatch(this::isValid);
+        return cars.stream().allMatch(Validator::isValid);
     }
 
     /**
      * Модель не должна быть пустой и должна быть не длиннее N символов
      */
-    private boolean isModelValid(String model) {
-        return model != null && !model.trim().isEmpty() && model.length() <= 50;
+    private static boolean isModelValid(String model) {
+        return model != null && !model.trim().isEmpty() && model.length() <= MAX_MODEL_LENGTH;
     }
 
     /**
      * Год должен быть в разумном диапазоне
      */
-    private boolean isYearValid(int year) {
-        final int MIN_YEAR = 1900;
-        final int MAX_YEAR = java.time.Year.now().getValue();
+    private static boolean isYearValid(int year) {
         return year >= MIN_YEAR && year <= MAX_YEAR;
     }
 
     /**
      * Мощность должна быть положительной
      */
-    private boolean isPowerValid(int power) {
-        return power > 0;
+    private static boolean isPowerValid(int power) {
+        return power > MIN_POWER;
     }
 }

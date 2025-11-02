@@ -35,3 +35,18 @@ desktop.ini
 ### Logs ###
 logs/
 *.log
+
+# Project Specific Exclusions
+# ---------------------------
+# Временный тестовый драйвер, который должен написать другой разработчик.
+src/main/java/team/shellsort/App.java
+
+# Временная заглушка для Car.java (если вы оставили ее в main)
+# src/main/java/team/shellsort/input/Car.java
+
+
+
+
+
+
+
