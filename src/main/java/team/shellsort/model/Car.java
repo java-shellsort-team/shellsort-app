@@ -1,5 +1,7 @@
 package team.shellsort.model;
 
+import java.util.Objects;
+
 public class Car {
     private final String model;
     private final int year;
@@ -22,8 +24,8 @@ public class Car {
      */
     public static class CarBuilder {
         private String model;
-        private int power;
         private int year;
+        private int power;
 
         public CarBuilder setModel(String model) {
             this.model = model;
@@ -58,7 +60,26 @@ public class Car {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Car car = (Car) o;
+        return year == car.year &&
+                power == car.power &&
+                Objects.equals(model, car.model);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(model, year, power);
+    }
+
+    @Override
     public String toString() {
-        return "Машина модели " + model + ", год выпуска " + year + ", л.с. " + power;
+        return "Машина {" +
+                "Модель='" + model + '\'' +
+                ", Год=" + year +
+                ", л.с.=" + power +
+                '}';
     }
 }
