@@ -1,0 +1,40 @@
+package team.shellsort.strategy;
+
+import org.junit.jupiter.api.Test;
+import team.shellsort.model.Car;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ByYearTest {
+    @Test
+    void sortsByYear_thenByModelIgnoreCase_thenByPower() {
+        SortStrategy strategy = new ByYear();
+        Comparator<Car> cmp = strategy.comparator();
+
+        List<Car> list = new ArrayList<>(TestData.cars());
+        list.sort(cmp);
+
+        List<String> expected = List.of(
+                "audi:2009:110",     // 2009: среди 2009 модель 'audi' < 'null'
+                "null:2009:80",
+                "citroen:2010:90",   // 2010
+                "Audi:2011:120",     // 2011
+                "BMW:2012:125",      // 2012: одинаковая модель -> power 125 < 130
+                "BMW:2012:130",
+                "bmw:2015:150"       // 2015
+        );
+
+        assertEquals(expected, toTriples(list));
+    }
+
+    private static List<String> toTriples(List<Car> cars) {
+        return cars.stream()
+                .map(c -> (c.getModel() == null ? "null" : c.getModel()) +
+                        ":" + c.getYear() + ":" + c.getPower())
+                .toList();
+    }
+}
