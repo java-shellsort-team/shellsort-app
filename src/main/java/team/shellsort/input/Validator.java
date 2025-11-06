@@ -28,21 +28,25 @@ public final class Validator {
     /**
      * Модель не должна быть пустой и должна быть не длиннее N символов
      */
-    private static boolean isModelValid(String model) {
-        return model != null && !model.trim().isEmpty() && model.length() <= MAX_MODEL_LENGTH;
+    public static boolean isModelValid(String model) {
+        if (model == null) {
+            return false;
+        }
+        String trimmedModel = model.trim();
+        return !trimmedModel.isEmpty() && trimmedModel.length() <= MAX_MODEL_LENGTH;
     }
 
     /**
      * Год должен быть в разумном диапазоне
      */
-    private static boolean isYearValid(int year) {
+    public static boolean isYearValid(int year) {
         return year >= MIN_YEAR && year <= MAX_YEAR;
     }
 
     /**
      * Мощность должна быть положительной
      */
-    private static boolean isPowerValid(int power) {
+    public static boolean isPowerValid(int power) {
         return power > MIN_POWER;
     }
 }
