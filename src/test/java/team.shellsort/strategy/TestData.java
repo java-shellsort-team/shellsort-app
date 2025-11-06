@@ -7,7 +7,7 @@ import java.util.List;
 public class TestData {
     private TestData() {}
 
-    static List<Car> cars() {
+    static public List<Car> cars() {
         return List.of(
                 new Car.CarBuilder().setModel("Audi").setYear(2011).setPower(120).build(),
                 new Car.CarBuilder().setModel("bmw").setYear(2015).setPower(150).build(),

@@ -28,13 +28,6 @@ public class ByPowerTest {
                 "bmw:2015:150"
         );
 
-        assertEquals(expected, toTriples(list));
-    }
-
-    private static List<String> toTriples(List<Car> cars) {
-        return cars.stream()
-                .map(c -> (c.getModel() == null ? "null" : c.getModel()) +
-                        ":" + c.getYear() + ":" + c.getPower())
-                .toList();
+        assertEquals(expected, TestUtils.toTriples(list));
     }
 }

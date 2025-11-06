@@ -19,22 +19,15 @@ public class ByYearTest {
         list.sort(cmp);
 
         List<String> expected = List.of(
-                "audi:2009:110",     // 2009: среди 2009 модель 'audi' < 'null'
+                "audi:2009:110",
                 "null:2009:80",
-                "citroen:2010:90",   // 2010
-                "Audi:2011:120",     // 2011
-                "BMW:2012:125",      // 2012: одинаковая модель -> power 125 < 130
+                "citroen:2010:90",
+                "Audi:2011:120",
+                "BMW:2012:125",
                 "BMW:2012:130",
-                "bmw:2015:150"       // 2015
+                "bmw:2015:150"
         );
 
-        assertEquals(expected, toTriples(list));
-    }
-
-    private static List<String> toTriples(List<Car> cars) {
-        return cars.stream()
-                .map(c -> (c.getModel() == null ? "null" : c.getModel()) +
-                        ":" + c.getYear() + ":" + c.getPower())
-                .toList();
+        assertEquals(expected, TestUtils.toTriples(list));
     }
 }
