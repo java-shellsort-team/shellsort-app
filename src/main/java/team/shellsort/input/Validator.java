@@ -1,4 +1,6 @@
 package team.shellsort.input;
+import team.shellsort.model.Car;
+
 import java.util.List;
 
 public final class Validator {
