@@ -1,5 +1,8 @@
 package team.shellsort;
 
+import team.shellsort.input.ConsoleDataProvider;
+import team.shellsort.input.FileDataProvider;
+import team.shellsort.input.RandomDataProvider;
 import team.shellsort.model.Car;
 import team.shellsort.strategy.ByModel;
 import team.shellsort.strategy.ByPower;
@@ -46,7 +49,7 @@ public class App {
      */
     public static void main(String[] args) {
         System.out.println("=== ShellSort App (черновик интеграции) ===");
-        runMenuLoop();
+//        runMenuLoop();
         System.out.println("Завершено. До встречи!");
     }
 
@@ -56,41 +59,41 @@ public class App {
      *
      * <p>Цикл продолжается, пока пользователь не выберет пункт «Выход».
      */
-    private static void runMenuLoop() {
-        while (true) {
-            int source = askSource();
-            if (source == 0) {
-                break;
-            }
-
-            int limit = askInt("Введите количество элементов (1..1000): ", 1, 1000);
-            SortStrategy strategy = askStrategy();
-
-            // ===== Загрузка данных =====
-            // TODO (Давид + Артём): заменить mock на реальные провайдеры после интеграции Validator’а
-            // Пример будущего кода:
-            // DataProvider dp = switch (source) {
-            //     case 1 -> new ConsoleDataProvider(SC, new LineParser());
-            //     case 2 -> new FileDataProvider(/* path или запрос пути */);
-            //     case 3 -> new RandomDataProvider(/* seed? */);
-            //     case 4 -> new MockDataProviderAdapter(); // если захотим оставить mock
-            //     default -> throw new IllegalStateException("Неожиданный источник: " + source);
-            // };
-            // LoadResult lr = dp.load(); // либо dp.load(limit), если финальная сигнатура с лимитом
-            // List<Car> cars = lr.validCars(); // имя метода — как договоримся
-            List<Car> cars = loadMockData(limit);
-
-            // ===== Сортировка =====
-            cars.sort(strategy.comparator());
-
-            // ===== Вывод =====
-            printCars(cars);
-
-            if (!askYesNo("Ещё раз? (y/n): ")) {
-                break;
-            }
-        }
-    }
+//    private static void runMenuLoop() {
+//        while (true) {
+//            int source = askSource();
+//            if (source == 0) {
+//                break;
+//            }
+//
+//            int limit = askInt("Введите количество элементов (1..1000): ", 1, 1000);
+//            SortStrategy strategy = askStrategy();
+//
+//            // ===== Загрузка данных =====
+//            // TODO (Давид + Артём): заменить mock на реальные провайдеры после интеграции Validator’а
+//            // Пример будущего кода:
+//            // DataProvider dp = switch (source) {
+//            //     case 1 -> new ConsoleDataProvider(SC, new LineParser());
+//            //     case 2 -> new FileDataProvider(/* path или запрос пути */);
+//            //     case 3 -> new RandomDataProvider(/* seed? */);
+//            //     case 4 -> new MockDataProviderAdapter(); // если захотим оставить mock
+//            //     default -> throw new IllegalStateException("Неожиданный источник: " + source);
+//            // };
+//            // LoadResult lr = dp.load(); // либо dp.load(limit), если финальная сигнатура с лимитом
+//            // List<Car> cars = lr.validCars(); // имя метода — как договоримся
+//            List<Car> cars = loadMockData(limit);
+//
+//            // ===== Сортировка =====
+//            cars.sort(strategy.comparator());
+//
+//            // ===== Вывод =====
+//            printCars(cars);
+//
+//            if (!askYesNo("Ещё раз? (y/n): ")) {
+//                break;
+//            }
+//        }
+//    }
 
     /**
      * Отображает меню выбора источника данных и возвращает выбранный пункт.
@@ -129,20 +132,20 @@ public class App {
      *
      * @return выбранная стратегия сортировки
      */
-    private static SortStrategy askStrategy() {
-        System.out.println();
-        System.out.println("Выберите стратегию сортировки:");
-        System.out.println("  1) По модели (ignore case, nulls last) -> год -> мощность");
-        System.out.println("  2) По мощности -> модель (ignore case) -> год");
-        System.out.println("  3) По году -> модель (ignore case) -> мощность");
-        int choice = askInt("Ваш выбор: ", 1, 3);
-        return switch (choice) {
-            case 1 -> new ByModel();
-            case 2 -> new ByPower();
-            case 3 -> new ByYear();
-            default -> throw new IllegalStateException("Неожиданный выбор: " + choice);
-        };
-    }
+//    private static SortStrategy askStrategy() {
+//        System.out.println();
+//        System.out.println("Выберите стратегию сортировки:");
+//        System.out.println("  1) По модели (ignore case, nulls last) -> год -> мощность");
+//        System.out.println("  2) По мощности -> модель (ignore case) -> год");
+//        System.out.println("  3) По году -> модель (ignore case) -> мощность");
+//        int choice = askInt("Ваш выбор: ", 1, 3);
+//        return switch (choice) {
+//            case 1 -> new ByModel();
+//            case 2 -> new ByPower();
+//            case 3 -> new ByYear();
+//            default -> throw new IllegalStateException("Неожиданный выбор: " + choice);
+//        };
+//    }
 
     /**
      * Создаёт и возвращает список тестовых объектов {@code Car}.

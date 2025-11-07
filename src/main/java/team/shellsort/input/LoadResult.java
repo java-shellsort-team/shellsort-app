@@ -1,5 +1,7 @@
 package team.shellsort.input;
 
+import team.shellsort.model.Car;
+
 import java.util.Collections;
 import java.util.List;
 
