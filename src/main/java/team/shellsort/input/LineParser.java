@@ -3,33 +3,38 @@ package team.shellsort.input;
 import team.shellsort.model.Car;
 
 public class LineParser {
-    public Car parseCar(String line) {
-        // TODO: реализовать парсинг строки вида "model;power;year"
 
-        Car.CarBuilder carBuilder = new Car.CarBuilder();
-        String[] arr = line.split(" ");
-        arr = line.split(" ");
+    private static final String SEPARATOR = ";";
 
-        try {
-            if (Validator.isModelValid(arr[0])) {
-                carBuilder.setModel(arr[0]);
-            } else {
-                System.out.println("Модель не прошла валидность: " + arr[0]);
-            }
-            if (Validator.isPowerValid(Integer.parseInt(arr[1]))) {
-                carBuilder.setPower(Integer.parseInt(arr[1]));
-            } else {
-                System.out.println("Год не прошел валидность: " + arr[1]);
-            }
-            if (Validator.isYearValid(Integer.parseInt(arr[2]))) {
-                carBuilder.setYear(Integer.parseInt(arr[2]));
-            } else {
-                System.out.println("Мощность не прошла валидность: " + arr[2]);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+    /**
+     * Парсит строку формата: "Модель;Мощность;Год".
+     * Возвращает собранный Car при валидных данных, иначе — null.
+     */
+    public Car parse(String line) {
+        if (line == null || line.trim().isEmpty()) {
+            return null;
         }
 
-        return carBuilder.build();
+        String[] parts = line.split(SEPARATOR);
+        if (parts.length != 3) {
+            return null;
+        }
+
+        try {
+            String model = parts[0].trim();
+            int power = Integer.parseInt(parts[1].trim());
+            int year  = Integer.parseInt(parts[2].trim());
+
+            Car car = new Car.CarBuilder()
+                    .setModel(model)
+                    .setPower(power)
+                    .setYear(year)
+                    .build();
+
+            return Validator.isValid(car) ? car : null;
+
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

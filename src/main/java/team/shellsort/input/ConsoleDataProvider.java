@@ -2,58 +2,64 @@ package team.shellsort.input;
 
 import team.shellsort.model.Car;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleDataProvider implements DataProvider {
+
+    private static final String STOP_COMMAND = "stop";
+    private final Scanner scanner;
+
+    public ConsoleDataProvider(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
     @Override
-    public LoadResult load(int limit) {
-        // TODO: реализовать ввод из консоли
-        Scanner scanner = new Scanner(System.in);
-        List<Car> cars = new ArrayList<>();
-        
-        String answer = "";
-        String model = "";
-        int year = 0;
-        int power = 0;
+    public LoadResult load() throws IOException {
+        List<Car> validCars = new ArrayList<>();
+        List<String> invalidLines = new ArrayList<>();
+        LineParser parser = new LineParser();
 
-        while (!answer.equals("n")) {
-            try {
+        System.out.println("-----------------------------------------------------");
+        System.out.println("ВВОД С КОНСОЛИ (формат строки: Модель;Мощность;Год)");
+        System.out.printf("Введите количество элементов (или '%s' для выхода):%n", STOP_COMMAND);
 
-                System.out.println("Введите модель");
-                model = scanner.nextLine();
-                if (!Validator.isModelValid(model)) {
-                    System.out.println("Модель не прошла валидность");
-                    continue;
-                }
+        // Читаем первую строку: либо число, либо команда выхода
+        String first = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
+        if (first.equalsIgnoreCase(STOP_COMMAND)) {
+            return new LoadResult(validCars, invalidLines);
+        }
 
-                System.out.println("Введите год");
-                year = Integer.parseInt(scanner.nextLine());
-                if (!Validator.isYearValid(year)) {
-                    System.out.println("Год не прошел валидность");
-                    continue;
-                }
+        int count;
+        try {
+            count = Integer.parseInt(first);
+        } catch (NumberFormatException e) {
+            System.err.println("Ошибка: ожидалось число. Завершение ввода.");
+            return new LoadResult(validCars, invalidLines);
+        }
 
-                System.out.println("Введите мощность");
-                power = Integer.parseInt(scanner.nextLine());
-                if (!Validator.isPowerValid(power)) {
-                    System.out.println("Мощность не прошла валидность");
-                    continue;
-                }
+        System.out.printf("Ожидается %d строк. Для досрочного завершения вводите '%s'.%n", count, STOP_COMMAND);
 
-                cars.add(new Car.CarBuilder().setModel(model).setYear(year).setPower(power).build());
+        for (int i = 0; i < count; i++) {
+            System.out.printf("Введите строку %d/%d: ", i + 1, count);
+            if (!scanner.hasNextLine()) break;
 
-                System.out.println("Для выхода нажмите n для продолжение нажмите Enter");
-                answer = scanner.nextLine();
-            } catch (Exception e) {
-                System.out.println("Для ввода года и мощности используйте цифры");
+            String line = scanner.nextLine();
+            if (line == null || line.trim().equalsIgnoreCase(STOP_COMMAND)) {
+                System.out.println("Ввод досрочно завершён командой 'stop'.");
+                break;
+            }
+
+            Car car = parser.parse(line);
+            if (car != null) {
+                validCars.add(car);
+            } else {
+                invalidLines.add(line);
             }
         }
 
-
-        List<String> errors = new ArrayList<>();
-        return new LoadResult(cars, errors);
+        return new LoadResult(validCars, invalidLines);
     }
-
 }
