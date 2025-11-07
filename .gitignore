@@ -35,3 +35,6 @@ desktop.ini
 ### Logs ###
 logs/
 *.log
+
+# allow Gradle Wrapper JAR
+!gradle/wrapper/gradle-wrapper.jar
