@@ -25,6 +25,7 @@ public class ByModelTest {
                 "BMW:2012:130",
                 "bmw:2015:150",
                 "citroen:2010:90",
+                "citroen:2010:90",
                 "null:2009:80"
         );
 

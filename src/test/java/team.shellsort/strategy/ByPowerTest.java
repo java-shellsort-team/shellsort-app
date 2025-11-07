@@ -21,6 +21,7 @@ public class ByPowerTest {
         List<String> expected = List.of(
                 "null:2009:80",
                 "citroen:2010:90",
+                "citroen:2010:90",
                 "audi:2009:110",
                 "Audi:2011:120",
                 "BMW:2012:125",

@@ -15,7 +15,8 @@ public class TestData {
                 new Car.CarBuilder().setModel("citroen").setYear(2010).setPower(90).build(),
                 new Car.CarBuilder().setModel(null).setYear(2009).setPower(80).build(),
                 new Car.CarBuilder().setModel("audi").setYear(2009).setPower(110).build(),
-                new Car.CarBuilder().setModel("BMW").setYear(2012).setPower(125).build()
+                new Car.CarBuilder().setModel("BMW").setYear(2012).setPower(125).build(),
+                new Car.CarBuilder().setModel("citroen").setYear(2010).setPower(90).build()
         );
     }
 }

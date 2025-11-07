@@ -6,5 +6,6 @@ import java.util.Comparator;
 public interface SortStrategy {
     Comparator<Car> comparator();
     String name();
+    SortKey key();
 }
 

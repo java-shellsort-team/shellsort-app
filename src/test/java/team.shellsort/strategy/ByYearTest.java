@@ -22,6 +22,7 @@ public class ByYearTest {
                 "audi:2009:110",
                 "null:2009:80",
                 "citroen:2010:90",
+                "citroen:2010:90",
                 "Audi:2011:120",
                 "BMW:2012:125",
                 "BMW:2012:130",
