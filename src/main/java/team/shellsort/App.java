@@ -130,8 +130,15 @@ public class App {
 
             ShellSort.sort(cars, comparator, ShellSort.GapType.CLASSIC);
 
-            // ===== Вывод данных =====
+            // ===== Вывод валидных данных =====
             printCars(cars);
+
+            // ===== Вывод невалидных данных, если таковые имеются =====
+            List<String> invalidCars = lr.getInvalid();
+            if (invalidCars != null && !invalidCars.isEmpty()) {
+                printInvalidCars(invalidCars);
+            }
+
 
         } catch (IOException e) {
             System.out.println("Ошибка при загрузке данных: " + e.getMessage());
@@ -233,6 +240,23 @@ public class App {
             return;
         }
         System.out.println("Результат сортировки (" + cars.size() + " шт.):");
+        for (int i = 0; i < cars.size(); i++) {
+            System.out.printf("%2d) %s%n", i + 1, cars.get(i));
+        }
+        System.out.println();
+    }
+
+    /**
+     * Выводит список автомобилей, которые не прошли валидацию
+     *
+     * <p>Каждый элемент выводится на новой строке в виде:
+     * <pre>
+     *  1) Машина {Модель='Audi', Год=2019, л.с.=200}
+     * </pre>
+     * @param cars список автомобилей для вывода
+     */
+    private static void printInvalidCars(List<String> cars) {
+        System.out.println("!!! Элементы не прошедшие валидацию (" + cars.size() + " шт.) !!!");
         for (int i = 0; i < cars.size(); i++) {
             System.out.printf("%2d) %s%n", i + 1, cars.get(i));
         }
