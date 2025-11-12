@@ -1,10 +1,8 @@
 package team.shellsort;
 
 import team.shellsort.model.Car;
-import team.shellsort.strategy.ByModel;
-import team.shellsort.strategy.ByPower;
-import team.shellsort.strategy.ByYear;
-import team.shellsort.strategy.SortStrategy;
+import team.shellsort.sort.ShellSort;
+import team.shellsort.strategy.*;
 import team.shellsort.input.DataProvider;
 import team.shellsort.input.ConsoleDataProvider;
 import team.shellsort.input.FileDataProvider;
@@ -12,6 +10,7 @@ import team.shellsort.input.RandomDataProvider;
 import team.shellsort.input.LoadResult;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -120,7 +119,14 @@ public class App {
 
             // ===== Сортировка =====
             SortStrategy strategy = askStrategy();
-            cars.sort(strategy.comparator());
+            SortDirection direction = askDirection();
+
+            Comparator<Car> comparator = strategy.comparator();
+            if (direction == SortDirection.DESCENDING) {
+                comparator = comparator.reversed();
+            }
+
+            ShellSort.sort(cars, comparator, ShellSort.GapType.CLASSIC);
 
             // ===== Вывод данных =====
             printCars(cars);
@@ -145,9 +151,9 @@ public class App {
     private static SortStrategy askStrategy() {
         System.out.println();
         System.out.println("Выберите стратегию сортировки:");
-        System.out.println("  1) По модели (ignore case, nulls last) -> год -> мощность");
-        System.out.println("  2) По мощности -> модель (ignore case) -> год");
-        System.out.println("  3) По году -> модель (ignore case) -> мощность");
+        System.out.println("  1) По модели -> год -> мощность");
+        System.out.println("  2) По мощности -> модель -> год");
+        System.out.println("  3) По году -> модель -> мощность");
         int choice = askInt("Ваш выбор: ", 1, 3);
         return switch (choice) {
             case 1 -> new ByModel();
@@ -155,6 +161,27 @@ public class App {
             case 3 -> new ByYear();
             default -> throw new IllegalStateException("Неожиданный выбор: " + choice);
         };
+    }
+
+    /**
+     * Отображает меню выбора с сортировкой по убыванию или возрастанию
+     *
+     * <p>Доступные варианты:
+     * <ul>
+     *   <li>1 — сортировка по возрастанию</li>
+     *   <li>2 — сортировка по убыванию</li>
+     * </ul>
+     *
+     * @return выбранная стратегия сортировки
+     */
+    private static SortDirection askDirection() {
+        System.out.println();
+        System.out.println("Выберите сортировку по возрастанию или убыванию:");
+        System.out.println("  1) По возрастанию");
+        System.out.println("  2) По убыванию");
+
+        int choice = askInt("Ваш выбор: ", 1, 2);
+        return choice == 1 ? SortDirection.ASCENDING : SortDirection.DESCENDING;
     }
 
     /**
