@@ -111,7 +111,7 @@ public class App {
             case 2 ->  (askYesNo("Использовать файл по умолчанию? (y/n): "))
                     ? new FileDataProvider()
                     : new FileDataProvider(askFilePath());
-            case 3 -> new RandomDataProvider();
+            case 3 -> new RandomDataProvider(askInt("Введите количество генерируемых автомобилей: ", 1, 1000));
             default -> throw new IllegalStateException("Неожиданный источник: " + source);
         };
 
