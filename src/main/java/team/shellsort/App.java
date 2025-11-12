@@ -9,6 +9,7 @@ import team.shellsort.input.FileDataProvider;
 import team.shellsort.input.RandomDataProvider;
 import team.shellsort.input.LoadResult;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -107,8 +108,9 @@ public class App {
         DataProvider dp = switch (source) {
             case 1 -> new ConsoleDataProvider(SC);
             // TODO: как считывать с определённого файла
-            case 2 -> new FileDataProvider();
-            // TODO: нужен ли управляемый рандом... думаю, что нет
+            case 2 ->  (askYesNo("Использовать файл по умолчанию? (y/n): "))
+                    ? new FileDataProvider()
+                    : new FileDataProvider(askFilePath());
             case 3 -> new RandomDataProvider();
             default -> throw new IllegalStateException("Неожиданный источник: " + source);
         };
@@ -182,6 +184,35 @@ public class App {
 
         int choice = askInt("Ваш выбор: ", 1, 2);
         return choice == 1 ? SortDirection.ASCENDING : SortDirection.DESCENDING;
+    }
+
+    /**
+     * Запрашивает путь к файлу для загрузки данных
+     *
+     * @return корректный путь к существующему файлу
+     */
+    private static String askFilePath() {
+        while (true) {
+            System.out.print("Введите путь к файлу: ");
+            String filePath = SC.nextLine().trim();
+
+            if (filePath.isEmpty()) {
+                System.out.println("Путь не может быть пустым. Попробуйте снова");
+                continue;
+            }
+
+            File file = new File(filePath);
+            if (file.exists() && file.isFile()) {
+                return filePath;
+            } else {
+                System.out.println("Файл не найден: " + filePath);
+                System.out.println("Попробуйте снова или введите 'stop'");
+
+                if ("stop".equalsIgnoreCase(filePath)) {
+                    throw new RuntimeException("Выбор файла отменён пользователем");
+                }
+            }
+        }
     }
 
     /**

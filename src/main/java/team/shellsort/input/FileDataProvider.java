@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -33,9 +35,19 @@ public class FileDataProvider implements DataProvider {
     /** Чтение из указанного ресурса classpath. */
     public FileDataProvider(String resourceName) {
         this.readerSupplier = () -> {
-            InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName);
-            if (is == null) throw new UncheckedIOException(new IOException("Resource not found: " + resourceName));
-            return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            // Этот кусок необходим, если файл не получается найти в classpath (проблемы конфигурации Gradle или IDE)
+            Path filePath = Path.of(resourceName);
+            if (Files.exists(filePath)) {
+                try {
+                    return Files.newBufferedReader(filePath, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(new IOException("Ошибка при чтении файла: " + resourceName, e));
+                }
+            } else {
+                InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName);
+                if (is == null) throw new UncheckedIOException(new IOException("Resource not found: " + resourceName));
+                return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            }
         };
     }
 
