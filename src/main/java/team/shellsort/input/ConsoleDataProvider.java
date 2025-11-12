@@ -1,5 +1,7 @@
 package team.shellsort.input;
 
+import team.shellsort.model.Car;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ public class ConsoleDataProvider implements DataProvider {
 
     private static final String STOP_COMMAND = "stop";
     private final Scanner scanner;
+
     public ConsoleDataProvider(Scanner scanner) {
         this.scanner = scanner;
     }
@@ -49,8 +52,7 @@ public class ConsoleDataProvider implements DataProvider {
             }
 
             Car car = parser.parse(line);
-
-            if (car != null) {
+            if (car != null && Validator.isValid(car)) {
                 validCars.add(car);
             } else {
                 invalidLines.add(line);

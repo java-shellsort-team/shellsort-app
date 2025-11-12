@@ -23,6 +23,8 @@ public class FileDataProvider implements DataProvider {
 
     private final Supplier<BufferedReader> readerSupplier;
 
+    private static final LineParser PARSER = new LineParser();
+
     /** По умолчанию читаем из ресурса {@code CarList.txt}. */
     public FileDataProvider() {
         this(DEFAULT_RESOURCE);
@@ -46,19 +48,17 @@ public class FileDataProvider implements DataProvider {
     public LoadResult load() throws IOException {
         List<Car> valid = new ArrayList<>();
         List<String> invalid = new ArrayList<>();
-        LineParser parser = new LineParser();
 
         try (BufferedReader br = readerSupplier.get()) {
             for (String line; (line = br.readLine()) != null; ) {
                 line = line.trim();
                 if (line.isEmpty()) continue;
 
-                Car car = parser.parse(line);          // ожидаем: Модель;Мощность;Год
+                Car car = PARSER.parse(line);
                 if (Validator.isValid(car)) valid.add(car);
                 else invalid.add(line);
             }
         } catch (UncheckedIOException e) {
-            // прокидываем исходный IOException
             throw e.getCause();
         }
 
