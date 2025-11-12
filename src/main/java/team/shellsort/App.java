@@ -5,19 +5,16 @@ import team.shellsort.strategy.ByModel;
 import team.shellsort.strategy.ByPower;
 import team.shellsort.strategy.ByYear;
 import team.shellsort.strategy.SortStrategy;
-// TODO (интеграция ввода): раскомментировать, когда будут готовы провайдеры
-// import team.shellsort.input.DataProvider;
-// import team.shellsort.input.ConsoleDataProvider;
-// import team.shellsort.input.FileDataProvider;
-// import team.shellsort.input.RandomDataProvider;
-// import team.shellsort.input.LineParser;
-// import team.shellsort.input.LoadResult;
+import team.shellsort.input.DataProvider;
+import team.shellsort.input.ConsoleDataProvider;
+import team.shellsort.input.FileDataProvider;
+import team.shellsort.input.RandomDataProvider;
+import team.shellsort.input.LoadResult;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Точка входа и интеграционный каркас приложения ShellSort App.
@@ -63,28 +60,7 @@ public class App {
                 break;
             }
 
-            int limit = askInt("Введите количество элементов (1..1000): ", 1, 1000);
-            SortStrategy strategy = askStrategy();
-
-            // ===== Загрузка данных =====
-            // TODO (Давид + Артём): заменить mock на реальные провайдеры после интеграции Validator’а
-            // Пример будущего кода:
-            // DataProvider dp = switch (source) {
-            //     case 1 -> new ConsoleDataProvider(SC, new LineParser());
-            //     case 2 -> new FileDataProvider(/* path или запрос пути */);
-            //     case 3 -> new RandomDataProvider(/* seed? */);
-            //     case 4 -> new MockDataProviderAdapter(); // если захотим оставить mock
-            //     default -> throw new IllegalStateException("Неожиданный источник: " + source);
-            // };
-            // LoadResult lr = dp.load(); // либо dp.load(limit), если финальная сигнатура с лимитом
-            // List<Car> cars = lr.validCars(); // имя метода — как договоримся
-            List<Car> cars = loadMockData(limit);
-
-            // ===== Сортировка =====
-            cars.sort(strategy.comparator());
-
-            // ===== Вывод =====
-            printCars(cars);
+            processData(source);
 
             if (!askYesNo("Ещё раз? (y/n): ")) {
                 break;
@@ -112,9 +88,46 @@ public class App {
         System.out.println("  1) Консоль");
         System.out.println("  2) Файл");
         System.out.println("  3) Случайные данные");
-        System.out.println("  4) Mock (временные данные)");
         System.out.println("  0) Выход");
-        return askInt("Ваш выбор: ", 0, 4);
+        return askInt("Ваш выбор: ", 0, 3);
+    }
+
+    /**
+     * Выполняет полный цикл обработки данных: загрузку, сортировку и вывод.
+     *
+     * <p>В зависимости от выбранного источника (1-консоль, 2-файл, 3-рандом) создаётся
+     * соответствующий провайдер данных. Загруженные данные сортируются по выбранной
+     * стратегии и выводятся пользователю.
+     *
+     * <p>В случае ошибки ввода-вывода пробрасывается исключение и управление
+     * возвращается в главный цикл для повторной попытки.
+     *
+     * @param source идентификатор источника данных (1, 2, 3)
+     */
+    private static void processData(int source) {
+        DataProvider dp = switch (source) {
+            case 1 -> new ConsoleDataProvider(SC);
+            // TODO: как считывать с определённого файла
+            case 2 -> new FileDataProvider();
+            // TODO: нужен ли управляемый рандом... думаю, что нет
+            case 3 -> new RandomDataProvider();
+            default -> throw new IllegalStateException("Неожиданный источник: " + source);
+        };
+
+        try {
+            LoadResult lr = dp.load();
+            List<Car> cars = lr.getValid();
+
+            // ===== Сортировка =====
+            SortStrategy strategy = askStrategy();
+            cars.sort(strategy.comparator());
+
+            // ===== Вывод данных =====
+            printCars(cars);
+
+        } catch (IOException e) {
+            System.out.println("Ошибка при загрузке данных: " + e.getMessage());
+        }
     }
 
     /**
@@ -145,24 +158,11 @@ public class App {
     }
 
     /**
-     * Создаёт и возвращает список тестовых объектов {@code Car}.
-     *
-     * <p>Метод используется временно, пока не подключены реальные провайдеры.
-     * Значения генерируются случайно из фиксированных наборов.
-     *
-     * @param n желаемое количество элементов
-     * @return список сгенерированных объектов {@code Car}
-     */
-    private static List<Car> loadMockData(int n) {
-        return MockDataProvider.of(n).load();
-    }
-
-    /**
      * Выводит список автомобилей в консоль в удобочитаемом формате.
      *
      * <p>Каждый элемент выводится на новой строке в виде:
      * <pre>
-     *  1) Машина модели Audi, год выпуска 2011, л.с. 120
+     *  1) Машина {Модель='Audi', Год=2019, л.с.=200}
      * </pre>
      * Если список пуст — выводится сообщение об отсутствии данных.
      *
@@ -224,41 +224,6 @@ public class App {
             if (s.equals("y") || s.equals("yes") || s.equals("д") || s.equals("да")) return true;
             if (s.equals("n") || s.equals("no") || s.equals("н") || s.equals("нет")) return false;
             System.out.println("Ответьте 'y' или 'n'.");
-        }
-    }
-
-    // ===== Временный мок-провайдер вместо настоящих DataProvider’ов =====
-
-    /**
-     * Простой генератор списка {@code Car} для локального запуска и демонстрации.
-     * Заменяется реальными DataProvider’ами после интеграции ввода и валидации.
-     */
-    private static final class MockDataProvider {
-        private final int n;
-
-        private MockDataProvider(int n) { this.n = n; }
-
-        static MockDataProvider of(int n) { return new MockDataProvider(n); }
-
-        List<Car> load() {
-            List<Car> list = new ArrayList<>(n);
-            String[] models = {"Audi", "BMW", "bmw", "citroen", "Lada", null, "Toyota", "audi"};
-            int[] years = {2009, 2010, 2011, 2012, 2015, 2005, 2018, 2020};
-            int[] powers = {80, 90, 110, 120, 125, 130, 150, 100};
-
-            ThreadLocalRandom rnd = ThreadLocalRandom.current();
-            for (int i = 0; i < n; i++) {
-                String m = models[rnd.nextInt(models.length)];
-                int y = years[rnd.nextInt(years.length)];
-                int p = powers[rnd.nextInt(powers.length)];
-                Car car = new Car.CarBuilder()
-                        .setModel(m)
-                        .setYear(y)
-                        .setPower(p)
-                        .build();
-                list.add(car);
-            }
-            return list;
         }
     }
 }
