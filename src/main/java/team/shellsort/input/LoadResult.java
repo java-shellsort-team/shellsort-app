@@ -1,26 +1,28 @@
 package team.shellsort.input;
 
+import team.shellsort.model.Car;
+
 import java.util.Collections;
 import java.util.List;
 
 public class LoadResult {
-    private final List<Car> validCars;
-    private final List<String> invalidLines;
+    private final List<Car> valid;
+    private final List<String> invalid;
 
     public LoadResult(List<Car> validCars, List<String> invalidLines) {
-        this.validCars = validCars != null ? validCars : Collections.emptyList();
-        this.invalidLines = invalidLines != null ? invalidLines : Collections.emptyList();
+        this.valid = validCars != null ? validCars : Collections.emptyList();
+        this.invalid = invalidLines != null ? invalidLines : Collections.emptyList();
     }
 
-    public List<Car> getValidCars() {
-        return validCars;
+    public List<Car> getValid() {
+        return valid;
     }
 
-    public List<String> getInvalidLines() {
-        return invalidLines;
+    public List<String> getInvalid() {
+        return invalid;
     }
 
     public boolean isSuccess() {
-        return !validCars.isEmpty() && invalidLines.isEmpty();
+        return !valid.isEmpty() && invalid.isEmpty();
     }
 }

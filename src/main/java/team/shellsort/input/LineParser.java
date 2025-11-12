@@ -1,5 +1,7 @@
 package team.shellsort.input;
 
+import team.shellsort.model.Car;
+
 public class LineParser {
 
     private static final String SEPARATOR = ";";
@@ -19,13 +21,11 @@ public class LineParser {
             int power = Integer.parseInt(parts[1].trim());
             int year = Integer.parseInt(parts[2].trim());
 
-            Car car = new Car(model, power, year);
-
-            if (Validator.isValid(car)) {
-                return car;
-            } else {
-                return null;
-            }
+            return new Car.CarBuilder()
+                    .setModel(model)
+                    .setPower(power)
+                    .setYear(year)
+                    .build();
 
         } catch (NumberFormatException e) {
             return null;
