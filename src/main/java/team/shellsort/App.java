@@ -1,16 +1,14 @@
 package team.shellsort;
 
+import team.shellsort.input.*;
 import team.shellsort.model.Car;
 import team.shellsort.sort.ShellSort;
 import team.shellsort.strategy.*;
-import team.shellsort.input.DataProvider;
-import team.shellsort.input.ConsoleDataProvider;
-import team.shellsort.input.FileDataProvider;
-import team.shellsort.input.RandomDataProvider;
-import team.shellsort.input.LoadResult;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -22,12 +20,10 @@ import java.util.Scanner;
  * <p>Задачи класса:
  * <ul>
  *   <li>Отобразить меню и собрать пользовательский выбор;</li>
- *   <li>Загрузить данные (пока через mock, позже — через DataProvider’ы);</li>
- *   <li>Отсортировать список объектов {@code Car} выбранной стратегией;</li>
+ *   <li>Загрузить данные из выбранного источника;</li>
+ *   <li>Отсортировать список объектов {@link Car} выбранной стратегией;</li>
  *   <li>Вывести результат и предложить повтор.</li>
  * </ul>
- *
- * <p>Точки интеграции помечены {@code TODO}.
  */
 public class App {
 
@@ -42,6 +38,9 @@ public class App {
      * @param args аргументы командной строки (не используются)
      */
     public static void main(String[] args) {
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+        System.setErr(new PrintStream(System.err, true, StandardCharsets.UTF_8));
+
         System.out.println("=== ShellSort App (черновик интеграции) ===");
         runMenuLoop();
         System.out.println("Завершено. До встречи!");
@@ -71,16 +70,9 @@ public class App {
     /**
      * Отображает меню выбора источника данных и возвращает выбранный пункт.
      *
-     * <p>Пользователь может выбрать:
-     * <ul>
-     *   <li>1 — ввод из консоли;</li>
-     *   <li>2 — чтение из файла;</li>
-     *   <li>3 — генерация случайных данных;</li>
-     *   <li>4 — mock-данные (временные тестовые значения);</li>
-     *   <li>0 — выход из программы.</li>
-     * </ul>
+     * <p>Пользователь может выбрать 1–3 или 0 для выхода.</p>
      *
-     * @return номер выбранного пункта меню (0–4)
+     * @return номер выбранного пункта меню (0–3)
      */
     private static int askSource() {
         System.out.println();
@@ -95,23 +87,27 @@ public class App {
     /**
      * Выполняет полный цикл обработки данных: загрузку, сортировку и вывод.
      *
-     * <p>В зависимости от выбранного источника (1-консоль, 2-файл, 3-рандом) создаётся
-     * соответствующий провайдер данных. Загруженные данные сортируются по выбранной
-     * стратегии и выводятся пользователю.
-     *
-     * <p>В случае ошибки ввода-вывода пробрасывается исключение и управление
-     * возвращается в главный цикл для повторной попытки.
+     * <p>В зависимости от выбранного источника (1 — консоль, 2 — файл, 3 — рандом)
+     * создаётся соответствующий провайдер данных. Загруженные данные сортируются
+     * по выбранной стратегии и выводятся пользователю.
      *
      * @param source идентификатор источника данных (1, 2, 3)
      */
     private static void processData(int source) {
         DataProvider dp = switch (source) {
             case 1 -> new ConsoleDataProvider(SC);
-            // TODO: как считывать с определённого файла
-            case 2 ->  (askYesNo("Использовать файл по умолчанию? (y/n): "))
-                    ? new FileDataProvider()
-                    : new FileDataProvider(askFilePath());
-            case 3 -> new RandomDataProvider(askInt("Введите количество генерируемых автомобилей: ", 1, 1000));
+            case 2 -> {
+                if (askYesNo("Использовать файл по умолчанию? (y/n): ")) {
+                    yield new FileDataProvider();
+                }
+                String path = askFilePath();
+                yield (path == null)
+                        ? new FileDataProvider()
+                        : new FileDataProvider(path);
+            }
+            case 3 -> new RandomDataProvider(
+                    askInt("Введите количество генерируемых автомобилей: ", 1, 1000)
+            );
             default -> throw new IllegalStateException("Неожиданный источник: " + source);
         };
 
@@ -139,7 +135,6 @@ public class App {
                 printInvalidCars(invalidCars);
             }
 
-
         } catch (IOException e) {
             System.out.println("Ошибка при загрузке данных: " + e.getMessage());
         }
@@ -150,9 +145,9 @@ public class App {
      *
      * <p>Доступные варианты:
      * <ul>
-     *   <li>1 — сортировка по модели (ignore case, nulls last) → год → мощность;</li>
-     *   <li>2 — сортировка по мощности → модель (ignore case) → год;</li>
-     *   <li>3 — сортировка по году → модель (ignore case) → мощность.</li>
+     *   <li>1 — по модели → год → мощность;</li>
+     *   <li>2 — по мощности → модель → год;</li>
+     *   <li>3 — по году → модель → мощность.</li>
      * </ul>
      *
      * @return выбранная стратегия сортировки
@@ -173,15 +168,9 @@ public class App {
     }
 
     /**
-     * Отображает меню выбора с сортировкой по убыванию или возрастанию
+     * Отображает меню выбора направления сортировки (возрастание/убывание).
      *
-     * <p>Доступные варианты:
-     * <ul>
-     *   <li>1 — сортировка по возрастанию</li>
-     *   <li>2 — сортировка по убыванию</li>
-     * </ul>
-     *
-     * @return выбранная стратегия сортировки
+     * @return {@link SortDirection#ASCENDING} или {@link SortDirection#DESCENDING}
      */
     private static SortDirection askDirection() {
         System.out.println();
@@ -194,9 +183,10 @@ public class App {
     }
 
     /**
-     * Запрашивает путь к файлу для загрузки данных
+     * Запрашивает путь к файлу для загрузки данных.
      *
-     * @return корректный путь к существующему файлу
+     * @return корректный путь к существующему файлу или {@code null},
+     * если пользователь отменил ввод (ввёл {@code stop})
      */
     private static String askFilePath() {
         while (true) {
@@ -208,16 +198,17 @@ public class App {
                 continue;
             }
 
+            if ("stop".equalsIgnoreCase(filePath)) {
+                System.out.println("Выбор файла отменён.");
+                return null;
+            }
+
             File file = new File(filePath);
             if (file.exists() && file.isFile()) {
                 return filePath;
             } else {
                 System.out.println("Файл не найден: " + filePath);
                 System.out.println("Попробуйте снова или введите 'stop'");
-
-                if ("stop".equalsIgnoreCase(filePath)) {
-                    throw new RuntimeException("Выбор файла отменён пользователем");
-                }
             }
         }
     }
@@ -247,16 +238,12 @@ public class App {
     }
 
     /**
-     * Выводит список автомобилей, которые не прошли валидацию
+     * Выводит список строк, которые не прошли валидацию.
      *
-     * <p>Каждый элемент выводится на новой строке в виде:
-     * <pre>
-     *  1) Машина {Модель='Audi', Год=2019, л.с.=200}
-     * </pre>
-     * @param cars список автомобилей для вывода
+     * @param cars список исходных «битых» строк
      */
     private static void printInvalidCars(List<String> cars) {
-        System.out.println("!!! Элементы не прошедшие валидацию (" + cars.size() + " шт.) !!!");
+        System.out.println("!!! Элементы, не прошедшие валидацию (" + cars.size() + " шт.) !!!");
         for (int i = 0; i < cars.size(); i++) {
             System.out.printf("%2d) %s%n", i + 1, cars.get(i));
         }
@@ -268,7 +255,7 @@ public class App {
      *
      * <p>Метод выполняет валидацию ввода: повторяет запрос,
      * пока не будет введено корректное значение в пределах {@code [min, max]}.
-     * Если пользователь вводит некорректные данные — отображается сообщение об ошибке.
+     * Если пользователь вводит некорректные данные — отображается сообщение об ошибке.</p>
      *
      * @param prompt текст запроса, отображаемый пользователю
      * @param min    минимально допустимое значение
@@ -297,7 +284,7 @@ public class App {
      *
      * @param prompt текст запроса
      * @return {@code true}, если пользователь ответил «y/yes/д/да» (без учёта регистра),
-     *         иначе {@code false} для «n/no/н/нет»
+     * иначе {@code false} для «n/no/н/нет»
      */
     private static boolean askYesNo(String prompt) {
         while (true) {
