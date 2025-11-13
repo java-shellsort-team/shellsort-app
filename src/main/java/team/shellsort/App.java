@@ -41,7 +41,7 @@ public class App {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
         System.setErr(new PrintStream(System.err, true, StandardCharsets.UTF_8));
 
-        System.out.println("=== ShellSort App (черновик интеграции) ===");
+        System.out.println("=== ShellSort App ===");
         runMenuLoop();
         System.out.println("Завершено. До встречи!");
     }
@@ -101,15 +101,21 @@ public class App {
                     yield new FileDataProvider();
                 }
                 String path = askFilePath();
-                yield (path == null)
-                        ? new FileDataProvider()
-                        : new FileDataProvider(path);
+                if (path == null) {
+                    yield null;
+                }
+                yield new FileDataProvider(path);
             }
             case 3 -> new RandomDataProvider(
                     askInt("Введите количество генерируемых автомобилей: ", 1, 1000)
             );
             default -> throw new IllegalStateException("Неожиданный источник: " + source);
         };
+
+        if (dp == null) {
+            System.out.println("Источник данных не выбран. Возврат в меню.");
+            return;
+        }
 
         try {
             LoadResult lr = dp.load();
