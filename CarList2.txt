@@ -1,0 +1,20 @@
+Toyota;150;2018
+Honda;-50;2050
+Ford;180;1899
+BMW;0;2020
+Mercedes;220;2021
+Audi;9999;2019
+Volkswagen;120;0
+Nissan;140;3018
+not a car at all
+Kia;130;1800
+Chevrolet;160;2017
+Mazda;120;2025
+Subaru;170;2021
+Lexus;-1;2020
+Volvo;190;9999
+Jeep;180;2018
+Renault;110;2017
+Peugeot;-999;2016
+Skoda;115;2020
+Mitsubishi;140;2019
