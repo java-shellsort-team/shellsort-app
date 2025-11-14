@@ -2,14 +2,19 @@ package team.shellsort.input;
 
 import team.shellsort.model.Car;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Источник данных, читающий записи о машинах из консоли.
+ * Формат строки: Модель;Мощность;Год
+ */
 public class ConsoleDataProvider implements DataProvider {
 
     private static final String STOP_COMMAND = "stop";
+    private static final int MAX_ELEMENTS = 100_000;
+
     private final Scanner scanner;
 
     public ConsoleDataProvider(Scanner scanner) {
@@ -17,48 +22,83 @@ public class ConsoleDataProvider implements DataProvider {
     }
 
     @Override
-    public LoadResult load() throws IOException {
-        List<Car> validCars = new ArrayList<>();
-        List<String> invalidLines = new ArrayList<>();
-        LineParser parser = new LineParser();
-
-        System.out.println("-----------------------------------------------------");
+    public LoadResult load() {
+        System.out.println();
         System.out.println("ВВОД С КОНСОЛИ (Формат: Модель;Мощность;Год)");
-        System.out.println("Укажите количество элементов (например, 5):");
 
-        int count;
-        try {
-            count = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.err.println("Ошибка: Введено неверное число.");
-            return new LoadResult(validCars, invalidLines);
+        int count = askCountOrStop();
+        if (count == -1) {
+            System.out.println("Ввод с консоли отменён. Возврат к выбору источника данных.");
+            return null;
         }
 
-        System.out.printf("Ожидается %d строк. Для досрочного завершения введите '%s'.\n", count, STOP_COMMAND);
+        System.out.printf("Ожидается %d строк. Для досрочного завершения введите '%s'.%n",
+                count, STOP_COMMAND);
 
-        // 2. Построчный ввод
+        List<Car> valid = new ArrayList<>();
+        List<String> invalid = new ArrayList<>();
+        LineParser parser = new LineParser();
+
         for (int i = 0; i < count; i++) {
-            System.out.printf("Введите строку %d/%d: ", i + 1, count);
+            String line = scanner.nextLine().trim();
 
-            // Проверка, есть ли еще ввод (на всякий случай)
-            if (!scanner.hasNextLine()) {
+            if (STOP_COMMAND.equalsIgnoreCase(line)) {
+                System.out.println("Ввод досрочно завершён по команде '" + STOP_COMMAND + "'.");
                 break;
             }
-            String line = scanner.nextLine();
 
-            if (line == null || line.trim().equalsIgnoreCase(STOP_COMMAND)) {
-                System.out.println("Ввод досрочно завершен командой 'stop'.");
-                break;
+            if (line.isEmpty()) {
+                System.out.println("Пустая строка пропущена.");
+                continue;
             }
 
             Car car = parser.parse(line);
-            if (car != null && Validator.isValid(car)) {
-                validCars.add(car);
+            if (Validator.isValid(car)) {
+                valid.add(car);
             } else {
-                invalidLines.add(line);
+                invalid.add(line);
             }
         }
 
-        return new LoadResult(validCars, invalidLines);
+        return new LoadResult(valid, invalid);
+    }
+
+    /**
+     * Спрашивает количество элементов.
+     * Возвращает:
+     * - положительное число — если пользователь ввёл корректное значение;
+     * - -1 — если пользователь ввёл "stop".
+     */
+    private int askCountOrStop() {
+        while (true) {
+            System.out.print("Укажите количество элементов (от 1 до "
+                             + MAX_ELEMENTS + ", или '" + STOP_COMMAND + "' для отмены): ");
+            String raw = scanner.nextLine().trim();
+
+            if (STOP_COMMAND.equalsIgnoreCase(raw)) {
+                return -1;
+            }
+
+            int value;
+            try {
+                value = Integer.parseInt(raw);
+            } catch (NumberFormatException e) {
+                System.out.println("Ошибка: введите целое число (например, 5). Попробуйте снова.");
+                continue;
+            }
+
+            if (value <= 0) {
+                System.out.println("Ошибка: число должно быть положительным. Попробуйте снова.");
+                continue;
+            }
+
+            if (value > MAX_ELEMENTS) {
+                System.out.println("Слишком большое число. Допустимый максимум: " + MAX_ELEMENTS +
+                                   ". Попробуйте снова.");
+                continue;
+            }
+
+            return value;
+        }
     }
 }

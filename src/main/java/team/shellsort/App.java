@@ -50,7 +50,7 @@ public class App {
      * Основной цикл программы — отображает меню, обрабатывает выбор пользователя
      * и выполняет соответствующие действия (загрузка данных, сортировка, вывод и т.д.).
      *
-     * <p>Цикл продолжается, пока пользователь не выберет пункт «Выход».
+     * <p>Цикл продолжается, пока пользователь не выберет пункт «Выход».</p>
      */
     private static void runMenuLoop() {
         while (true) {
@@ -89,7 +89,7 @@ public class App {
      *
      * <p>В зависимости от выбранного источника (1 — консоль, 2 — файл, 3 — рандом)
      * создаётся соответствующий провайдер данных. Загруженные данные сортируются
-     * по выбранной стратегии и выводятся пользователю.
+     * по выбранной стратегии и выводятся пользователю.</p>
      *
      * @param source идентификатор источника данных (1, 2, 3)
      */
@@ -102,6 +102,7 @@ public class App {
                 }
                 String path = askFilePath();
                 if (path == null) {
+                    // пользователь отменил ввод — возвращаемся в меню
                     yield null;
                 }
                 yield new FileDataProvider(path);
@@ -113,13 +114,24 @@ public class App {
         };
 
         if (dp == null) {
-            System.out.println("Источник данных не выбран. Возврат в меню.");
-            return;
+            return; // ввод файла отменён пользователем
         }
 
         try {
             LoadResult lr = dp.load();
+
+               if (lr == null) {
+                return;
+            }
+
             List<Car> cars = lr.getValid();
+
+            // Если после загрузки нет валидных данных — нет смысла спрашивать стратегию
+            if (cars == null || cars.isEmpty()) {
+                System.out.println();
+                System.out.println("Список автомобилей пуст. Возврат к выбору источника данных.");
+                return;
+            }
 
             // ===== Сортировка =====
             SortStrategy strategy = askStrategy();
@@ -146,17 +158,9 @@ public class App {
         }
     }
 
+
     /**
      * Отображает меню выбора стратегии сортировки и возвращает выбранный вариант.
-     *
-     * <p>Доступные варианты:
-     * <ul>
-     *   <li>1 — по модели → год → мощность;</li>
-     *   <li>2 — по мощности → модель → год;</li>
-     *   <li>3 — по году → модель → мощность.</li>
-     * </ul>
-     *
-     * @return выбранная стратегия сортировки
      */
     private static SortStrategy askStrategy() {
         System.out.println();
@@ -175,8 +179,6 @@ public class App {
 
     /**
      * Отображает меню выбора направления сортировки (возрастание/убывание).
-     *
-     * @return {@link SortDirection#ASCENDING} или {@link SortDirection#DESCENDING}
      */
     private static SortDirection askDirection() {
         System.out.println();
@@ -219,17 +221,6 @@ public class App {
         }
     }
 
-    /**
-     * Выводит список автомобилей в консоль в удобочитаемом формате.
-     *
-     * <p>Каждый элемент выводится на новой строке в виде:
-     * <pre>
-     *  1) Машина {Модель='Audi', Год=2019, л.с.=200}
-     * </pre>
-     * Если список пуст — выводится сообщение об отсутствии данных.
-     *
-     * @param cars список автомобилей для вывода
-     */
     private static void printCars(List<Car> cars) {
         System.out.println();
         if (cars == null || cars.isEmpty()) {
@@ -243,11 +234,6 @@ public class App {
         System.out.println();
     }
 
-    /**
-     * Выводит список строк, которые не прошли валидацию.
-     *
-     * @param cars список исходных «битых» строк
-     */
     private static void printInvalidCars(List<String> cars) {
         System.out.println("!!! Элементы, не прошедшие валидацию (" + cars.size() + " шт.) !!!");
         for (int i = 0; i < cars.size(); i++) {
@@ -256,18 +242,6 @@ public class App {
         System.out.println();
     }
 
-    /**
-     * Запрашивает у пользователя целое число в указанном диапазоне.
-     *
-     * <p>Метод выполняет валидацию ввода: повторяет запрос,
-     * пока не будет введено корректное значение в пределах {@code [min, max]}.
-     * Если пользователь вводит некорректные данные — отображается сообщение об ошибке.</p>
-     *
-     * @param prompt текст запроса, отображаемый пользователю
-     * @param min    минимально допустимое значение
-     * @param max    максимально допустимое значение
-     * @return введённое пользователем число
-     */
     private static int askInt(String prompt, int min, int max) {
         while (true) {
             System.out.print(prompt);
@@ -285,13 +259,6 @@ public class App {
         }
     }
 
-    /**
-     * Запрашивает у пользователя ответ «да/нет».
-     *
-     * @param prompt текст запроса
-     * @return {@code true}, если пользователь ответил «y/yes/д/да» (без учёта регистра),
-     * иначе {@code false} для «n/no/н/нет»
-     */
     private static boolean askYesNo(String prompt) {
         while (true) {
             System.out.print(prompt);
